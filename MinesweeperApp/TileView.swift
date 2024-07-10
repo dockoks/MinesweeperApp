@@ -105,9 +105,9 @@ class TileView: UIView {
         
         UIView.transition(with: self, duration: 0.3, options: .transitionFlipFromLeft, animations: {
             if isDetonated {
-                self.backgroundColor = .red
+                self.backgroundColor = Config.shared.explodingBombTileColor
             } else if self.isBomb {
-                self.backgroundColor = .black
+                self.backgroundColor = Config.shared.bombTileColor
             } else {
                 self.backgroundColor = .tertiarySystemFill
                 self.label.isHidden = false

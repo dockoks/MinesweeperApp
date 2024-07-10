@@ -6,40 +6,95 @@ enum GameMode {
     case hard
 }
 
+protocol ConfigDelegate: AnyObject {
+    func configDidChange()
+}
+
 final class Config {
     
+    weak var delegate: ConfigDelegate?
+    
     // Game options
-    var gameMode: GameMode
-    var boardTilesNumber: Int
+    var gameMode: GameMode {
+        didSet { notifyDelegate() }
+    }
+    var boardTilesNumber: Int {
+        didSet { notifyDelegate() }
+    }
     
     // Insets
-    var boardPadding: Int
-    var tileGap: Int
+    var boardPadding: Int {
+        didSet { notifyDelegate() }
+    }
+    var tileGap: Int {
+        didSet {
+            updateTileCornerRadius()
+            notifyDelegate()
+        }
+    }
     
-    var boardCornerRadius: Int
-    var tileCornerRadius: Int {
-        boardCornerRadius - tileGap
+    var boardCornerRadius: Int {
+        didSet {
+            updateTileCornerRadius()
+            notifyDelegate()
+        }
+    }
+    var tileCornerRadius: Int = 0 {
+        didSet { notifyDelegate() }
     }
     
     // Colors
-    var boardColor: UIColor
-    var closedTileColor: UIColor
-    var openedTileColor: UIColor
-    var bombTileColor: UIColor
-    var explodingBombTileColor: UIColor
-    var bombsNearbyColor: UIColor
-    var markBorderColor: UIColor
-    var bombSymbol: String
-    var markBorderWidth: Int
+    var boardColor: UIColor {
+        didSet { notifyDelegate() }
+    }
+    var closedTileColor: UIColor {
+        didSet { notifyDelegate() }
+    }
+    var openedTileColor: UIColor {
+        didSet { notifyDelegate() }
+    }
+    var bombTileColor: UIColor {
+        didSet { notifyDelegate() }
+    }
+    var explodingBombTileColor: UIColor {
+        didSet { notifyDelegate() }
+    }
+    var bombsNearbyColor: UIColor {
+        didSet { notifyDelegate() }
+    }
+    var markBorderColor: UIColor {
+        didSet { notifyDelegate() }
+    }
+    var bombSymbol: String {
+        didSet { notifyDelegate() }
+    }
+    var markBorderWidth: Int {
+        didSet { notifyDelegate() }
+    }
     
     // Application Specifics
-    var isHapticsEnabled: Bool
+    var isHapticsEnabled: Bool {
+        didSet { notifyDelegate() }
+    }
     
     // Initialisation
     private init(
         gameMode: GameMode,
         boardTilesNumber: Int,
-        boardPadding: Int, tileGap: Int, boardCornerRadius: Int, boardColor: UIColor, closedTileColor: UIColor, openedTileColor: UIColor, bombTileColor: UIColor, explodingBombTileColor: UIColor, bombsNearbyColor: UIColor, markBorderColor: UIColor, bombSymbol: String, markBorderWidth: Int, isHapticsEnabled: Bool) {
+        boardPadding: Int,
+        tileGap: Int,
+        boardCornerRadius: Int,
+        boardColor: UIColor,
+        closedTileColor: UIColor,
+        openedTileColor: UIColor,
+        bombTileColor: UIColor,
+        explodingBombTileColor: UIColor,
+        bombsNearbyColor: UIColor,
+        markBorderColor: UIColor,
+        bombSymbol: String,
+        markBorderWidth: Int,
+        isHapticsEnabled: Bool
+    ) {
         self.gameMode = gameMode
         self.boardTilesNumber = boardTilesNumber
         self.boardPadding = boardPadding
@@ -55,6 +110,15 @@ final class Config {
         self.bombSymbol = bombSymbol
         self.markBorderWidth = markBorderWidth
         self.isHapticsEnabled = isHapticsEnabled
+        updateTileCornerRadius()
+    }
+    
+    private func notifyDelegate() {
+        delegate?.configDidChange()
+    }
+    
+    private func updateTileCornerRadius() {
+        tileCornerRadius = boardCornerRadius - tileGap
     }
     
     static let shared: Config = {
