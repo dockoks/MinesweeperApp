@@ -1,6 +1,6 @@
 import UIKit
 
-enum GameMode {
+enum GameMode: Int {
     case easy
     case medium
     case hard
@@ -11,6 +11,9 @@ protocol ConfigDelegate: AnyObject {
 }
 
 final class Config {
+    
+    let modes = ["Easy", "Medium", "Hard"]
+    let bombSymbols = ["💣", "⭐️", "💥", "🔥", "👾", "🎃"]
     
     weak var delegate: ConfigDelegate?
     

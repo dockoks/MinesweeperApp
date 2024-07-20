@@ -17,8 +17,10 @@
 		4E1794802C307E8C00EF306D /* Resources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E17947F2C307E8C00EF306D /* Resources.swift */; };
 		4E4563ED2C3493DE00A5CEB5 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4563EC2C3493DE00A5CEB5 /* Config.swift */; };
 		4E4563EF2C37D84800A5CEB5 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4563EE2C37D84800A5CEB5 /* HomeViewController.swift */; };
-		4E4563F12C38871000A5CEB5 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4563F02C38871000A5CEB5 /* SettingsViewController.swift */; };
 		4E585D722C3E50A8007A6F4D /* SampleBoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E585D712C3E50A8007A6F4D /* SampleBoardView.swift */; };
+		4E585DF82C4ABEAD007A6F4D /* SettingsTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E585DF72C4ABEAD007A6F4D /* SettingsTableViewCell.swift */; };
+		4E585DFA2C4AC0F7007A6F4D /* IconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E585DF92C4AC0F7007A6F4D /* IconButton.swift */; };
+		4E585DFC2C4AC81B007A6F4D /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E585DFB2C4AC81B007A6F4D /* SettingsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,8 +36,10 @@
 		4E17947F2C307E8C00EF306D /* Resources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resources.swift; sourceTree = "<group>"; };
 		4E4563EC2C3493DE00A5CEB5 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		4E4563EE2C37D84800A5CEB5 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
-		4E4563F02C38871000A5CEB5 /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		4E585D712C3E50A8007A6F4D /* SampleBoardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleBoardView.swift; sourceTree = "<group>"; };
+		4E585DF72C4ABEAD007A6F4D /* SettingsTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTableViewCell.swift; sourceTree = "<group>"; };
+		4E585DF92C4AC0F7007A6F4D /* IconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconButton.swift; sourceTree = "<group>"; };
+		4E585DFB2C4AC81B007A6F4D /* SettingsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,9 +73,11 @@
 			isa = PBXGroup;
 			children = (
 				4E1794672C3059E500EF306D /* AppDelegate.swift */,
-				4E4563F02C38871000A5CEB5 /* SettingsViewController.swift */,
+				4E585DFB2C4AC81B007A6F4D /* SettingsViewController.swift */,
 				4E1794692C3059E500EF306D /* SceneDelegate.swift */,
 				4E17946B2C3059E500EF306D /* GameViewController.swift */,
+				4E585DF92C4AC0F7007A6F4D /* IconButton.swift */,
+				4E585DF72C4ABEAD007A6F4D /* SettingsTableViewCell.swift */,
 				4E4563EE2C37D84800A5CEB5 /* HomeViewController.swift */,
 				4E585D712C3E50A8007A6F4D /* SampleBoardView.swift */,
 				4E17947D2C30754600EF306D /* TileView.swift */,
@@ -155,16 +161,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E585DFA2C4AC0F7007A6F4D /* IconButton.swift in Sources */,
 				4E17946C2C3059E500EF306D /* GameViewController.swift in Sources */,
 				4E4563ED2C3493DE00A5CEB5 /* Config.swift in Sources */,
 				4E17947C2C3061C600EF306D /* BoardView.swift in Sources */,
 				4E4563EF2C37D84800A5CEB5 /* HomeViewController.swift in Sources */,
 				4E1794682C3059E500EF306D /* AppDelegate.swift in Sources */,
 				4E1794802C307E8C00EF306D /* Resources.swift in Sources */,
+				4E585DF82C4ABEAD007A6F4D /* SettingsTableViewCell.swift in Sources */,
 				4E17947E2C30754600EF306D /* TileView.swift in Sources */,
+				4E585DFC2C4AC81B007A6F4D /* SettingsViewController.swift in Sources */,
 				4E585D722C3E50A8007A6F4D /* SampleBoardView.swift in Sources */,
 				4E17946A2C3059E500EF306D /* SceneDelegate.swift in Sources */,
-				4E4563F12C38871000A5CEB5 /* SettingsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

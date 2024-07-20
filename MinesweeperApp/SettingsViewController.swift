@@ -3,94 +3,10 @@ import UIKit
 class SettingsViewController: UIViewController {
     
     private let config = Config.shared
-    
-    let backButton: UIButton = {
-        let button = UIButton()
-        let imageConfig = UIImage.SymbolConfiguration(weight: .bold)
-        let image = UIImage(systemName: "chevron.left", withConfiguration: imageConfig)
-        button.setImage(image, for: .normal)
-        button.tintColor = .label
-        button.backgroundColor = .systemFill
-        button.layer.cornerRadius = CGFloat(Config.shared.boardCornerRadius)
-        button.layer.cornerCurve = .continuous
-        button.addTarget(self, action: #selector(goBack), for: .touchUpInside)
-        return button
-    }()
-    
-    private let sampleBoardWrapperView: UIView = {
-        let view = UIView()
-        view.backgroundColor = Config.shared.markBorderColor.withAlphaComponent(0.3)
-        return view
-    }()
-    
+    private let backButton = UIButton()
+    private let sampleBoardWrapperView = UIView()
     private let sampleBoardView = SampleBoardView()
-    
-    private let gameModeSegmentedControl: UISegmentedControl = {
-        let segmentedControl = UISegmentedControl(items: ["Easy", "Medium", "Hard"])
-        segmentedControl.selectedSegmentIndex = Config.shared.gameMode == .easy ? 0 : Config.shared.gameMode == .medium ? 1 : 2
-        segmentedControl.addTarget(self, action: #selector(gameModeChanged), for: .valueChanged)
-        return segmentedControl
-    }()
-    
-    private let boardTilesNumberStepper: UIStepper = {
-        let stepper = UIStepper()
-        stepper.maximumValue = 14
-        stepper.minimumValue = 2
-        stepper.value = Double(Config.shared.boardTilesNumber)
-        stepper.addTarget(self, action: #selector(boardTilesNumberChanged), for: .valueChanged)
-        return stepper
-    }()
-    
-    private let boardPaddingStepper: UIStepper = {
-        let stepper = UIStepper()
-        stepper.minimumValue = 2
-        stepper.maximumValue = 20
-        stepper.value = Double(Config.shared.boardPadding)
-        stepper.addTarget(self, action: #selector(boardPaddingChanged), for: .valueChanged)
-        return stepper
-    }()
-    
-    private let tileGapStepper: UIStepper = {
-        let stepper = UIStepper()
-        stepper.minimumValue = 1
-        stepper.maximumValue = 8
-        stepper.value = Double(Config.shared.tileGap)
-        stepper.addTarget(self, action: #selector(tileGapChanged), for: .valueChanged)
-        return stepper
-    }()
-    
-    private let boardCornerRadiusStepper: UIStepper = {
-        let stepper = UIStepper()
-        stepper.minimumValue = 0
-        stepper.maximumValue = 16
-        stepper.value = Double(Config.shared.boardCornerRadius)
-        stepper.addTarget(self, action: #selector(boardCornerRadiusChanged), for: .valueChanged)
-        return stepper
-    }()
-    
-    private let bombSymbolSegmentedControl: UISegmentedControl = {
-        let symbols = ["💣", "⭐️", "💥", "🔥", "👾", "🎃"]
-        let segmentedControl = UISegmentedControl(items: symbols)
-        segmentedControl.selectedSegmentIndex = symbols.firstIndex(of: Config.shared.bombSymbol) ?? 0
-        segmentedControl.addTarget(self, action: #selector(bombSymbolChanged), for: .valueChanged)
-        return segmentedControl
-    }()
-    
-    private let markBorderWidthStepper: UIStepper = {
-        let stepper = UIStepper()
-        stepper.minimumValue = 1
-        stepper.maximumValue = 4
-        stepper.value = Double(Config.shared.markBorderWidth)
-        stepper.addTarget(self, action: #selector(markBorderWidthChanged), for: .valueChanged)
-        return stepper
-    }()
-    
-    private let hapticsEnabledSwitch: UISwitch = {
-        let hapticsSwitch = UISwitch()
-        hapticsSwitch.isOn = Config.shared.isHapticsEnabled
-        hapticsSwitch.addTarget(self, action: #selector(hapticsEnabledChanged), for: .valueChanged)
-        return hapticsSwitch
-    }()
+    private let tableView = UITableView(frame: .zero, style: .plain)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -104,119 +20,15 @@ class SettingsViewController: UIViewController {
         view.addSubview(sampleBoardWrapperView)
         sampleBoardWrapperView.addSubview(sampleBoardView)
         
-        sampleBoardWrapperView.translatesAutoresizingMaskIntoConstraints = false
-        sampleBoardView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            sampleBoardWrapperView.topAnchor.constraint(equalTo: view.topAnchor),
-            sampleBoardWrapperView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            sampleBoardWrapperView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            sampleBoardWrapperView.heightAnchor.constraint(equalToConstant: 240 + view.safeAreaInsets.top),
-            
-            sampleBoardView.centerXAnchor.constraint(equalTo: sampleBoardWrapperView.centerXAnchor),
-            sampleBoardView.bottomAnchor.constraint(equalTo: sampleBoardWrapperView.bottomAnchor)
-        ])
-        
         view.addSubview(backButton)
         
-        let scrollView = UIScrollView()
-        view.addSubview(scrollView)
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.register(SettingTableViewCell.self, forCellReuseIdentifier: "SettingCell")
+        view.addSubview(tableView)
         
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: sampleBoardWrapperView.bottomAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
-        ])
-        
-        let stackView = UIStackView(arrangedSubviews: [
-            createSettingView(title: "Game Mode", control: gameModeSegmentedControl),
-            createSettingView(title: "Board Tiles Number", control: boardTilesNumberStepper),
-            createSettingView(title: "Board Padding", control: boardPaddingStepper),
-            createSettingView(title: "Tile Gap", control: tileGapStepper),
-            createSettingView(title: "Board Corner Radius", control: boardCornerRadiusStepper),
-            createSettingView(title: "Bomb Symbol", control: bombSymbolSegmentedControl),
-            createSettingView(title: "Mark Border Width", control: markBorderWidthStepper),
-            createSettingView(title: "Haptics Enabled", control: hapticsEnabledSwitch)
-        ])
-        
-        stackView.axis = .vertical
-        stackView.spacing = 20
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        scrollView.addSubview(stackView)
-        
-        NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 20),
-            stackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 20),
-            stackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -20),
-            stackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -20),
-            stackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -40)
-        ])
-    }
-    
-    private func createSettingView(title: String, control: UIControl) -> UIView {
-        let label = UILabel()
-        label.text = title
-        label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
-        
-        let stackView = UIStackView(arrangedSubviews: [label, control])
-        stackView.axis = .vertical
-        stackView.spacing = 8
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        return stackView
-    }
-    
-    @objc private func gameModeChanged(_ sender: UISegmentedControl) {
-        switch sender.selectedSegmentIndex {
-        case 0:
-            config.gameMode = .easy
-        case 1:
-            config.gameMode = .medium
-        case 2:
-            config.gameMode = .hard
-        default:
-            break
-        }
-        sampleBoardView.configDidChange()
-    }
-    
-    @objc private func boardTilesNumberChanged(_ sender: UIStepper) {
-        config.boardTilesNumber = Int(sender.value)
-        sampleBoardView.configDidChange()
-    }
-    
-    @objc private func boardPaddingChanged(_ sender: UIStepper) {
-        config.boardPadding = Int(sender.value)
-        sampleBoardView.configDidChange()
-    }
-    
-    @objc private func tileGapChanged(_ sender: UIStepper) {
-        config.tileGap = Int(sender.value)
-        sampleBoardView.configDidChange()
-    }
-    
-    @objc private func boardCornerRadiusChanged(_ sender: UIStepper) {
-        config.boardCornerRadius = Int(sender.value)
-        sampleBoardView.configDidChange()
-    }
-    
-    @objc private func bombSymbolChanged(_ sender: UISegmentedControl) {
-        let symbols = ["💣", "⭐️", "💥", "🔥", "👾", "🎃"]
-        config.bombSymbol = symbols[sender.selectedSegmentIndex]
-        sampleBoardView.configDidChange()
-    }
-    
-    @objc private func markBorderWidthChanged(_ sender: UIStepper) {
-        config.markBorderWidth = Int(sender.value)
-        sampleBoardView.configDidChange()
-    }
-    
-    @objc private func hapticsEnabledChanged(_ sender: UISwitch) {
-        config.isHapticsEnabled = sender.isOn
-        sampleBoardView.configDidChange()
+        setupBackButton()
+        setupWrapperView()
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -230,6 +42,20 @@ class SettingsViewController: UIViewController {
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         layoutBackButton()
+        layoutWrapperView()
+        layoutTableView()
+        layoutSampleBoardView()
+    }
+    
+    private func setupBackButton() {
+        let imageConfig = UIImage.SymbolConfiguration(weight: .bold)
+        let image = UIImage(systemName: "chevron.left", withConfiguration: imageConfig)
+        backButton.setImage(image, for: .normal)
+        backButton.tintColor = .label
+        backButton.backgroundColor = .systemFill
+        backButton.layer.cornerRadius = CGFloat(Config.shared.boardCornerRadius)
+        backButton.layer.cornerCurve = .continuous
+        backButton.addTarget(self, action: #selector(goBack), for: .touchUpInside)
     }
     
     private func layoutBackButton() {
@@ -241,8 +67,189 @@ class SettingsViewController: UIViewController {
         )
     }
     
+    private func layoutWrapperView() {
+        let minEdge = min(view.bounds.height, view.bounds.width)
+        sampleBoardWrapperView.frame = CGRect(
+            x: 0,
+            y: 0,
+            width: minEdge,
+            height: minEdge
+        )
+    }
+    
+    private func layoutTableView() {
+        let minEdge = min(UIScreen.main.bounds.height, UIScreen.main.bounds.width)
+        if (minEdge == UIScreen.main.bounds.width) {
+            tableView.frame = CGRect(
+                x: 0,
+                y: sampleBoardWrapperView.frame.maxY,
+                width: view.bounds.width,
+                height: view.bounds.height - sampleBoardWrapperView.frame.maxY
+            )
+        } else {
+            tableView.frame = CGRect(
+                x: sampleBoardWrapperView.frame.maxX,
+                y: 0,
+                width: view.bounds.width - sampleBoardWrapperView.frame.maxX - view.safeAreaInsets.right,
+                height: view.bounds.height
+            )
+        }
+    }
+    
+    private func layoutSampleBoardView() {
+        let sampleBoardSize = sampleBoardView.sizeThatFits(sampleBoardWrapperView.bounds.size)
+        sampleBoardView.frame = CGRect(
+            x: (sampleBoardWrapperView.bounds.width - sampleBoardSize.width) / 2,
+            y: (sampleBoardWrapperView.bounds.height - sampleBoardSize.height) / 2,
+            width: sampleBoardSize.width,
+            height: sampleBoardSize.height
+        )
+    }
+    
+    private func setupWrapperView() {
+        sampleBoardWrapperView.backgroundColor = Config.shared.markBorderColor.withAlphaComponent(0.3)
+    }
+    
     @objc
     private func goBack(_ sender: UIButton) {
         self.navigationController?.popViewController(animated: true)
+    }
+}
+
+extension SettingsViewController: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
+        false
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 8
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "SettingCell", for: indexPath) as! SettingTableViewCell
+        let control: UIControl
+        let title: String
+        let value: String
+        
+        switch indexPath.row {
+        case 0:
+            title = "Game Mode"
+            control = UISegmentedControl(items: Config.shared.modes)
+            (control as! UISegmentedControl).selectedSegmentIndex = config.gameMode.rawValue
+            (control as! UISegmentedControl).addTarget(self, action: #selector(gameModeChanged(_:)), for: .valueChanged)
+            value = config.modes[config.gameMode.rawValue]
+        case 1:
+            title = "Board Tiles Number"
+            control = UIStepper()
+            (control as! UIStepper).maximumValue = 14
+            (control as! UIStepper).minimumValue = 2
+            (control as! UIStepper).value = Double(config.boardTilesNumber)
+            (control as! UIStepper).addTarget(self, action: #selector(boardTilesNumberChanged(_:)), for: .valueChanged)
+            value = "\(config.boardTilesNumber)"
+        case 2:
+            title = "Board Padding"
+            control = UIStepper()
+            (control as! UIStepper).maximumValue = 20
+            (control as! UIStepper).minimumValue = 2
+            (control as! UIStepper).value = Double(config.boardPadding)
+            (control as! UIStepper).addTarget(self, action: #selector(boardPaddingChanged(_:)), for: .valueChanged)
+            value = "\(config.boardPadding)"
+        case 3:
+            title = "Tile Gap"
+            control = UIStepper()
+            (control as! UIStepper).maximumValue = 8
+            (control as! UIStepper).minimumValue = 1
+            (control as! UIStepper).value = Double(config.tileGap)
+            (control as! UIStepper).addTarget(self, action: #selector(tileGapChanged(_:)), for: .valueChanged)
+            value = "\(config.tileGap)"
+        case 4:
+            title = "Board Corner Radius"
+            control = UIStepper()
+            (control as! UIStepper).maximumValue = 16
+            (control as! UIStepper).minimumValue = 0
+            (control as! UIStepper).value = Double(config.boardCornerRadius)
+            (control as! UIStepper).addTarget(self, action: #selector(boardCornerRadiusChanged(_:)), for: .valueChanged)
+            value = "\(config.boardCornerRadius)"
+        case 5:
+            title = "Bomb Symbol"
+            control = UISegmentedControl(items: Config.shared.bombSymbols)
+            (control as! UISegmentedControl).selectedSegmentIndex = Config.shared.bombSymbols.firstIndex(of: config.bombSymbol) ?? 0
+            (control as! UISegmentedControl).addTarget(self, action: #selector(bombSymbolChanged(_:)), for: .valueChanged)
+            value = config.bombSymbol
+        case 6:
+            title = "Mark Border Width"
+            control = UIStepper()
+            (control as! UIStepper).maximumValue = 4
+            (control as! UIStepper).minimumValue = 1
+            (control as! UIStepper).value = Double(config.markBorderWidth)
+            (control as! UIStepper).addTarget(self, action: #selector(markBorderWidthChanged(_:)), for: .valueChanged)
+            value = "\(config.markBorderWidth)"
+        case 7:
+            title = "Haptics Enabled"
+            control = UISwitch()
+            (control as! UISwitch).isOn = config.isHapticsEnabled
+            (control as! UISwitch).addTarget(self, action: #selector(hapticsEnabledChanged(_:)), for: .valueChanged)
+            value = config.isHapticsEnabled ? "On" : "Off"
+        default:
+            title = ""
+            control = UIControl()
+            value = ""
+        }
+        
+        cell.configure(title: title, control: control, value: value)
+        
+        return cell
+    }
+    
+    @objc private func gameModeChanged(_ sender: UISegmentedControl) {
+        config.gameMode = GameMode(rawValue: sender.selectedSegmentIndex) ?? .easy
+        sampleBoardView.configDidChange()
+        tableView.reloadData()
+    }
+    
+    @objc private func boardTilesNumberChanged(_ sender: UIStepper) {
+        config.boardTilesNumber = Int(sender.value)
+        sampleBoardView.configDidChange()
+        tableView.reloadData()
+    }
+    
+    @objc private func boardPaddingChanged(_ sender: UIStepper) {
+        config.boardPadding = Int(sender.value)
+        sampleBoardView.configDidChange()
+        tableView.reloadData()
+    }
+    
+    @objc private func tileGapChanged(_ sender: UIStepper) {
+        config.tileGap = Int(sender.value)
+        sampleBoardView.configDidChange()
+        tableView.reloadData()
+    }
+    
+    @objc private func boardCornerRadiusChanged(_ sender: UIStepper) {
+        config.boardCornerRadius = Int(sender.value)
+        sampleBoardView.configDidChange()
+        tableView.reloadData()
+    }
+    
+    @objc private func bombSymbolChanged(_ sender: UISegmentedControl) {
+        config.bombSymbol = Config.shared.bombSymbols[sender.selectedSegmentIndex]
+        sampleBoardView.configDidChange()
+        tableView.reloadData()
+    }
+    
+    @objc private func markBorderWidthChanged(_ sender: UIStepper) {
+        config.markBorderWidth = Int(sender.value)
+        sampleBoardView.configDidChange()
+        tableView.reloadData()
+    }
+    
+    @objc private func hapticsEnabledChanged(_ sender: UISwitch) {
+        config.isHapticsEnabled = sender.isOn
+        sampleBoardView.configDidChange()
+        tableView.reloadData()
     }
 }

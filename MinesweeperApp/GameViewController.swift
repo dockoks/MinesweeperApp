@@ -2,34 +2,11 @@ import UIKit
 
 class GameViewController: UIViewController {
     private let padding: CGFloat = CGFloat(Config.shared.boardPadding)
-    let boardView = BoardView(gameMode: Config.shared.gameMode)
+    private let boardView = BoardView(gameMode: Config.shared.gameMode)
+    private let backButton = UIButton()
+    private let flagButton = UIButton()
     
-    let backButton: UIButton = {
-        let button = UIButton()
-        let imageConfig = UIImage.SymbolConfiguration(weight: .bold)
-        let image = UIImage(systemName: "chevron.left", withConfiguration: imageConfig)
-        button.setImage(image, for: .normal)
-        button.tintColor = .label
-        button.backgroundColor = .systemFill
-        button.layer.cornerRadius = CGFloat(Config.shared.boardCornerRadius)
-        button.layer.cornerCurve = .continuous
-        button.addTarget(self, action: #selector(goBack), for: .touchUpInside)
-        return button
-    }()
-    
-    let flagButton: UIButton = {
-        let button = UIButton()
-        let image = UIImage(systemName: "flag.fill")
-        button.setImage(image, for: .normal)
-        button.tintColor = .label
-        button.backgroundColor = .systemFill
-        button.layer.cornerRadius = CGFloat(Config.shared.boardCornerRadius)
-        button.layer.cornerCurve = .continuous
-        button.addTarget(self, action: #selector(toggleFlagMode), for: .touchUpInside)
-        return button
-    }()
-    
-    var isFlaggingMode = false
+    private var isFlaggingMode = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,8 +21,32 @@ class GameViewController: UIViewController {
     }
     
     private func setupControls() {
+        setupBackButton()
+        setupFlagButton()
         view.addSubview(backButton)
         view.addSubview(flagButton)
+    }
+    
+    private func setupBackButton() {
+        let imageConfig = UIImage.SymbolConfiguration(weight: .bold)
+        let image = UIImage(systemName: "chevron.left", withConfiguration: imageConfig)
+        backButton.setImage(image, for: .normal)
+        backButton.tintColor = .label
+        backButton.backgroundColor = .systemFill
+        backButton.layer.cornerRadius = CGFloat(Config.shared.boardCornerRadius)
+        backButton.layer.cornerCurve = .continuous
+        backButton.addTarget(self, action: #selector(goBack), for: .touchUpInside)
+    }
+    
+    private func setupFlagButton() {
+        let imageConfig = UIImage.SymbolConfiguration(weight: .bold)
+        let image = UIImage(systemName: "flag.fill", withConfiguration: imageConfig)
+        flagButton.setImage(image, for: .normal)
+        flagButton.tintColor = .label
+        flagButton.backgroundColor = .systemFill
+        flagButton.layer.cornerRadius = CGFloat(Config.shared.boardCornerRadius)
+        flagButton.layer.cornerCurve = .continuous
+        flagButton.addTarget(self, action: #selector(toggleFlagMode), for: .touchUpInside)
     }
 
     override func viewWillLayoutSubviews() {

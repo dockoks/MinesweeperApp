@@ -7,7 +7,6 @@ enum TilePreview {
 }
 
 class SampleBoardView: UIView, ConfigDelegate {
-    
     enum Constants {
         static let tileSize: CGFloat = 48
     }
@@ -22,8 +21,10 @@ class SampleBoardView: UIView, ConfigDelegate {
     let labelUp = UILabel()
     let labelDown = UILabel()
     
+    let boardView = UIView()
+    
     override init(frame: CGRect) {
-        super.init(frame: .zero)
+        super.init(frame: frame)
         Config.shared.delegate = self
         setupView()
     }
@@ -41,15 +42,9 @@ class SampleBoardView: UIView, ConfigDelegate {
     }
     
     private func setupView() {
-        [labelUp, labelDown, labelLeft, labelRight].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            $0.text = "\(Config.shared.boardTilesNumber)"
-            $0.font = .systemFont(ofSize: 16)
-            $0.textColor = .secondaryLabel
-        }
-        
-        let boardView = makeSampleBoardView()
-        boardView.translatesAutoresizingMaskIntoConstraints = false
+        configureLabels()
+        configureTiles()
+        configureBoardView()
         
         self.addSubview(boardView)
         self.addSubview(labelUp)
@@ -57,25 +52,108 @@ class SampleBoardView: UIView, ConfigDelegate {
         self.addSubview(labelLeft)
         self.addSubview(labelRight)
         
-        let padding = CGFloat(Config.shared.boardPadding)
+        boardView.addSubview(tile1)
+        boardView.addSubview(tile2)
+        boardView.addSubview(tile3)
+        boardView.addSubview(tile4)
+    }
+    
+    private func configureBoardView() {
+        boardView.backgroundColor = Config.shared.boardColor
+        boardView.layer.cornerRadius = CGFloat(Config.shared.boardCornerRadius)
+        boardView.layer.cornerCurve = .continuous
+    }
+    
+    private func configureLabels() {
+        [labelUp, labelDown, labelLeft, labelRight].forEach {
+            $0.text = "\(Config.shared.boardTilesNumber)"
+            $0.font = .systemFont(ofSize: 16)
+            $0.textColor = .secondaryLabel
+        }
+    }
+    
+    private func configureTiles() {
+        configureTile(tile1, of: .bomb)
+        configureTile(tile2, of: .closed)
+        configureTile(tile3, of: .marked)
+        configureTile(tile4, of: .closed)
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
         
-        self.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            boardView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            boardView.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            
-            labelUp.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            labelUp.bottomAnchor.constraint(equalTo: boardView.topAnchor, constant: -padding),
-            
-            labelDown.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            labelDown.topAnchor.constraint(equalTo: boardView.bottomAnchor, constant: padding),
-            
-            labelLeft.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            labelLeft.rightAnchor.constraint(equalTo: boardView.leftAnchor, constant: -padding),
-            
-            labelRight.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-            labelRight.leftAnchor.constraint(equalTo: boardView.rightAnchor, constant: padding)
-        ])
+        let padding = CGFloat(Config.shared.boardPadding)
+        let tileGap = CGFloat(Config.shared.tileGap)
+        let boardSize = Constants.tileSize * 2 + tileGap * 3
+        
+        let boardOriginX = (self.bounds.width - boardSize) / 2
+        let boardOriginY = (self.bounds.height - boardSize) / 2
+        
+        configureTiles()
+        configureLabels()
+        
+        boardView.frame = CGRect(
+            x: boardOriginX,
+            y: boardOriginY,
+            width: boardSize,
+            height: boardSize
+        )
+        
+        tile1.frame = CGRect(
+            x: tileGap,
+            y: tileGap,
+            width: Constants.tileSize,
+            height: Constants.tileSize
+        )
+        
+        tile2.frame = CGRect(
+            x: tileGap * 2 + Constants.tileSize,
+            y: tileGap,
+            width: Constants.tileSize,
+            height: Constants.tileSize
+        )
+        
+        tile3.frame = CGRect(
+            x: tileGap,
+            y: tileGap * 2 + Constants.tileSize,
+            width: Constants.tileSize,
+            height: Constants.tileSize
+        )
+        
+        tile4.frame = CGRect(
+            x: tileGap * 2 + Constants.tileSize,
+            y: tileGap * 2 + Constants.tileSize,
+            width: Constants.tileSize,
+            height: Constants.tileSize
+        )
+        
+        labelUp.frame = CGRect(
+            x: (self.bounds.width - labelUp.intrinsicContentSize.width) / 2,
+            y: boardOriginY - padding - labelUp.intrinsicContentSize.height,
+            width: labelUp.intrinsicContentSize.width,
+            height: labelUp.intrinsicContentSize.height
+        )
+        
+        labelDown.frame = CGRect(
+            x: (self.bounds.width - labelDown.intrinsicContentSize.width) / 2,
+            y: boardOriginY + boardSize + padding,
+            width: labelDown.intrinsicContentSize.width,
+            height: labelDown.intrinsicContentSize.height
+        )
+        
+        labelLeft.frame = CGRect(
+            x: boardOriginX - padding - labelLeft.intrinsicContentSize.width,
+            y: (self.bounds.height - labelLeft.intrinsicContentSize.height) / 2,
+            width: labelLeft.intrinsicContentSize.width,
+            height: labelLeft.intrinsicContentSize.height
+        )
+        
+        labelRight.frame = CGRect(
+            x: boardOriginX + boardSize + padding,
+            y: (self.bounds.height - labelRight.intrinsicContentSize.height) / 2,
+            width: labelRight.intrinsicContentSize.width,
+            height: labelRight.intrinsicContentSize.height
+        )
     }
     
     private func configureTile(_ button: UIButton, of type: TilePreview) {
@@ -95,57 +173,9 @@ class SampleBoardView: UIView, ConfigDelegate {
         }
     }
     
-    private func makeSampleBoardView() -> UIView {
-        configureTile(tile1, of: .bomb)
-        configureTile(tile2, of: .closed)
-        configureTile(tile3, of: .marked)
-        configureTile(tile4, of: .closed)
-        
-        let boardView = UIView()
-        boardView.backgroundColor = Config.shared.boardColor
-        boardView.layer.cornerRadius = CGFloat(Config.shared.boardCornerRadius)
-        boardView.layer.cornerCurve = .continuous
-        
-        [tile1, tile2, tile3, tile4].forEach {
-            boardView.addSubview($0)
-            $0.translatesAutoresizingMaskIntoConstraints = false
-        }
-        
-        let tileGap = CGFloat(Config.shared.tileGap)
-        
-        NSLayoutConstraint.activate([
-            tile1.topAnchor.constraint(equalTo: boardView.topAnchor, constant: tileGap),
-            tile1.leftAnchor.constraint(equalTo: boardView.leftAnchor, constant: tileGap),
-            tile1.heightAnchor.constraint(equalToConstant: Constants.tileSize),
-            tile1.widthAnchor.constraint(equalToConstant: Constants.tileSize),
-            
-            tile2.topAnchor.constraint(equalTo: boardView.topAnchor, constant: tileGap),
-            tile2.leftAnchor.constraint(equalTo: tile1.rightAnchor, constant: tileGap),
-            tile2.heightAnchor.constraint(equalToConstant: Constants.tileSize),
-            tile2.widthAnchor.constraint(equalToConstant: Constants.tileSize),
-            
-            tile3.topAnchor.constraint(equalTo: tile1.bottomAnchor, constant: tileGap),
-            tile3.leftAnchor.constraint(equalTo: boardView.leftAnchor, constant: tileGap),
-            tile3.heightAnchor.constraint(equalToConstant: Constants.tileSize),
-            tile3.widthAnchor.constraint(equalToConstant: Constants.tileSize),
-            
-            tile4.topAnchor.constraint(equalTo: tile2.bottomAnchor, constant: tileGap),
-            tile4.leftAnchor.constraint(equalTo: tile3.rightAnchor, constant: tileGap),
-            tile4.heightAnchor.constraint(equalToConstant: Constants.tileSize),
-            tile4.widthAnchor.constraint(equalToConstant: Constants.tileSize),
-            
-            boardView.heightAnchor.constraint(equalToConstant: Constants.tileSize * 2 + tileGap * 3),
-            boardView.widthAnchor.constraint(equalToConstant: Constants.tileSize * 2 + tileGap * 3)
-        ])
-        
-        return boardView
-    }
-    
     func configDidChange() {
-        subviews.forEach { $0.removeFromSuperview() }
-        setupView()
-        invalidateIntrinsicContentSize()
         setNeedsLayout()
         layoutIfNeeded()
+        layoutSubviews()
     }
 }

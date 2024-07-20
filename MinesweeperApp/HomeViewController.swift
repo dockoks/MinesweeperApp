@@ -2,25 +2,8 @@ import Foundation
 import UIKit
 
 final class HomeViewController: UIViewController {
-    private let settingsButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Settings", for: .normal)
-        button.backgroundColor = .systemFill
-        button.layer.cornerRadius = 12
-        button.layer.cornerCurve = .continuous
-        button.addTarget(self, action: #selector(openSettings), for: .touchUpInside)
-        return button
-    }()
-    
-    private let startGameButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Start Game", for: .normal)
-        button.backgroundColor = .systemFill
-        button.layer.cornerRadius = 12
-        button.layer.cornerCurve = .continuous
-        button.addTarget(self, action: #selector(startGame), for: .touchUpInside)
-        return button
-    }()
+    private let settingsButton = UIButton()
+    private let startGameButton = UIButton()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,9 +20,29 @@ final class HomeViewController: UIViewController {
     }
     
     private func setupbuttons() {
+        configureSettingsButton()
+        configureStartGameButton()
         view.addSubview(startGameButton)
         view.addSubview(settingsButton)
         repositionButtons()
+    }
+    
+    private func configureSettingsButton() {
+        settingsButton.setTitle("Settings", for: .normal)
+        settingsButton.setTitleColor(.label, for: .normal)
+        settingsButton.backgroundColor = .systemFill
+        settingsButton.layer.cornerRadius = 12
+        settingsButton.layer.cornerCurve = .continuous
+        settingsButton.addTarget(self, action: #selector(openSettings), for: .touchUpInside)
+    }
+    
+    private func configureStartGameButton() {
+        startGameButton.setTitle("Start Game", for: .normal)
+        startGameButton.setTitleColor(.label, for: .normal)
+        startGameButton.backgroundColor = .systemFill
+        startGameButton.layer.cornerRadius = 12
+        startGameButton.layer.cornerCurve = .continuous
+        startGameButton.addTarget(self, action: #selector(startGame), for: .touchUpInside)
     }
     
     private func repositionButtons() {
