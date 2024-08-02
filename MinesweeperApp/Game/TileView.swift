@@ -69,7 +69,7 @@ class TileView: UIView {
     }
     
     func setupView() {
-        self.backgroundColor = Config.shared.closedTileColor
+        self.backgroundColor = UIColor(named: Config.shared.closedTileColor)
         self.layer.cornerRadius = CGFloat(Config.shared.tileCornerRadius)
         self.layer.cornerCurve = .continuous
         self.clipsToBounds = true
@@ -90,7 +90,7 @@ class TileView: UIView {
             if !self.isBomb && numberOfBombs > 0 {
                 label.text = "\(numberOfBombs)"
                 label.font = .systemFont(ofSize: max(12, self.frame.height/3))
-                label.textColor = Config.shared.bombsNearbyColor
+                label.textColor = UIColor(named: Config.shared.bombsNearbyColor)
                 label.textAlignment = .center
                 label.isHidden = true
             }
@@ -100,14 +100,16 @@ class TileView: UIView {
     func revealTile(isDetonated: Bool = false) {
         self.isRevealed = true
         self.isMarked = false
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
+        if Config.shared.isHapticsEnabled {
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+        }
         
         UIView.transition(with: self, duration: 0.3, options: .transitionFlipFromLeft, animations: {
             if isDetonated {
-                self.backgroundColor = Config.shared.explodingBombTileColor
+                self.backgroundColor = UIColor(named: Config.shared.explodingBombTileColor)
             } else if self.isBomb {
-                self.backgroundColor = Config.shared.bombTileColor
+                self.backgroundColor = UIColor(named: Config.shared.bombTileColor)
             } else {
                 self.backgroundColor = .tertiarySystemFill
                 self.label.isHidden = false
@@ -120,7 +122,7 @@ class TileView: UIView {
         isMarked.toggle()
         UIView.animate(withDuration: 0.3) {
             self.layer.borderWidth = self.isMarked ? CGFloat(Config.shared.markBorderWidth) : 0
-            self.layer.borderColor = self.isMarked ? Config.shared.markBorderColor.cgColor : UIColor.clear.cgColor
+            self.layer.borderColor = self.isMarked ? UIColor(named: Config.shared.markBorderColor)?.cgColor : UIColor.clear.cgColor
         }
     }
     

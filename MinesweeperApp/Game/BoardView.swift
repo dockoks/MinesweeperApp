@@ -1,6 +1,12 @@
 import UIKit
 
 final class BoardView: UIView {
+    enum Constants {
+        static let easyGameModeFactor: CGFloat = 10
+        static let mediumGameModeFactor: CGFloat = 8
+        static let hardGameModeFactor: CGFloat = 6
+    }
+    
     private let tileGap: Double = Double(Config.shared.tileGap)
     private var tiles: [TileView] = []
     private var numberOfTiles: Int {
@@ -30,7 +36,7 @@ final class BoardView: UIView {
         }
         
         super.init(frame: .zero)
-        self.backgroundColor = Config.shared.boardColor
+        self.backgroundColor = UIColor(named: Config.shared.boardColor)
         self.layer.cornerRadius = CGFloat(Config.shared.boardCornerRadius)
         self.layer.cornerCurve = .continuous
         self.clipsToBounds = true
@@ -130,16 +136,18 @@ final class BoardView: UIView {
             }
         }
 
-        if let viewController = findViewController() {
+        if let viewController = findViewController() as? GameViewController  {
             let alert = UIAlertController(
                 title: "Game Over",
                 message: "You hit a bomb. Try again!",
                 preferredStyle: .alert
             )
-            let action = UIAlertAction(title: "OK", style: .default, handler: { _ in
+            let action = UIAlertAction(title: "OK", style: .default) { _ in
                 self.resetBoard()
-            })
+                viewController.changeSubviewColor(color: .systemBackground)
+            }
             alert.addAction(action)
+            viewController.changeSubviewColor(color: UIColor(named: "Over")?.withAlphaComponent(0.2))
             viewController.present(alert, animated: true, completion: nil)
         }
     }
@@ -147,7 +155,7 @@ final class BoardView: UIView {
     private func checkForWin() {
         let isGameWon = tiles.allSatisfy { $0.isBomb || $0.isRevealed }
         if isGameWon {
-            if let viewController = findViewController() {
+            if let viewController = findViewController() as? GameViewController {
                 let alert = UIAlertController(
                     title: "You Won!",
                     message: "Congratulations, you've cleared the board!",
@@ -155,8 +163,10 @@ final class BoardView: UIView {
                 )
                 let action = UIAlertAction(title: "OK", style: .default, handler: { _ in
                     self.resetBoard()
+                    viewController.changeSubviewColor(color: .systemBackground)
                 })
                 alert.addAction(action)
+                viewController.changeSubviewColor(color: UIColor(named: "Win")?.withAlphaComponent(0.2))
                 viewController.present(alert, animated: true, completion: nil)
             }
         }
@@ -226,13 +236,5 @@ final class BoardView: UIView {
                 }
             }
         }
-    }
-}
-
-fileprivate extension BoardView {
-    enum Constants {
-        static let easyGameModeFactor: CGFloat = 10
-        static let mediumGameModeFactor: CGFloat = 8
-        static let hardGameModeFactor: CGFloat = 6
     }
 }

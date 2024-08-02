@@ -4,6 +4,15 @@ enum GameMode: Int {
     case easy
     case medium
     case hard
+    
+    init(string: String) {
+        switch string {
+        case "Easy": self = .easy
+        case "Medium": self = .medium
+        case "Hard": self = .hard
+        default: self = .easy
+        }
+    }
 }
 
 protocol ConfigDelegate: AnyObject {
@@ -11,27 +20,55 @@ protocol ConfigDelegate: AnyObject {
 }
 
 final class Config {
-    
-    let modes = ["Easy", "Medium", "Hard"]
-    let bombSymbols = ["💣", "⭐️", "💥", "🔥", "👾", "🎃"]
+    static let gameModeOptions: [String] = ["Easy", "Medium", "Hard"]
+    static let bombSymbolOptions: [String] = ["💣", "⭐️", "💥", "🔥", "👾", "🎃"]
+    static let markColorOptions: [String] = ["Teal", "Purple", "Yellow", "Pink", "Green"]
     
     weak var delegate: ConfigDelegate?
     
+    private enum Keys {
+        static let gameMode = "gameMode"
+        static let boardTilesNumber = "boardTilesNumber"
+        static let boardPadding = "boardPadding"
+        static let tileGap = "tileGap"
+        static let boardCornerRadius = "boardCornerRadius"
+        static let boardColor = "boardColor"
+        static let closedTileColor = "closedTileColor"
+        static let openedTileColor = "openedTileColor"
+        static let bombTileColor = "bombTileColor"
+        static let explodingBombTileColor = "explodingBombTileColor"
+        static let bombsNearbyColor = "bombsNearbyColor"
+        static let markBorderColor = "markBorderColor"
+        static let bombSymbol = "bombSymbol"
+        static let markBorderWidth = "markBorderWidth"
+        static let isHapticsEnabled = "isHapticsEnabled"
+    }
+    
     // Game options
     var gameMode: GameMode {
-        didSet { notifyDelegate() }
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
     var boardTilesNumber: Int {
-        didSet { notifyDelegate() }
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
     
     // Insets
     var boardPadding: Int {
-        didSet { notifyDelegate() }
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
     var tileGap: Int {
         didSet {
             updateTileCornerRadius()
+            saveToUserDefaults()
             notifyDelegate()
         }
     }
@@ -39,45 +76,79 @@ final class Config {
     var boardCornerRadius: Int {
         didSet {
             updateTileCornerRadius()
+            saveToUserDefaults()
             notifyDelegate()
         }
     }
     var tileCornerRadius: Int = 0 {
-        didSet { notifyDelegate() }
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
     
     // Colors
-    var boardColor: UIColor {
-        didSet { notifyDelegate() }
+    var boardColor: String {
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
-    var closedTileColor: UIColor {
-        didSet { notifyDelegate() }
+    var closedTileColor: String {
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
-    var openedTileColor: UIColor {
-        didSet { notifyDelegate() }
+    var openedTileColor: String {
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
-    var bombTileColor: UIColor {
-        didSet { notifyDelegate() }
+    var bombTileColor: String {
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
-    var explodingBombTileColor: UIColor {
-        didSet { notifyDelegate() }
+    var explodingBombTileColor: String {
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
-    var bombsNearbyColor: UIColor {
-        didSet { notifyDelegate() }
+    var bombsNearbyColor: String {
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
-    var markBorderColor: UIColor {
-        didSet { notifyDelegate() }
+    var markBorderColor: String {
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
     var bombSymbol: String {
-        didSet { notifyDelegate() }
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
     var markBorderWidth: Int {
-        didSet { notifyDelegate() }
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
     
     // Application Specifics
     var isHapticsEnabled: Bool {
-        didSet { notifyDelegate() }
+        didSet {
+            saveToUserDefaults()
+            notifyDelegate()
+        }
     }
     
     // Initialisation
@@ -87,13 +158,13 @@ final class Config {
         boardPadding: Int,
         tileGap: Int,
         boardCornerRadius: Int,
-        boardColor: UIColor,
-        closedTileColor: UIColor,
-        openedTileColor: UIColor,
-        bombTileColor: UIColor,
-        explodingBombTileColor: UIColor,
-        bombsNearbyColor: UIColor,
-        markBorderColor: UIColor,
+        boardColor: String,
+        closedTileColor: String,
+        openedTileColor: String,
+        bombTileColor: String,
+        explodingBombTileColor: String,
+        bombsNearbyColor: String,
+        markBorderColor: String,
         bombSymbol: String,
         markBorderWidth: Int,
         isHapticsEnabled: Bool
@@ -125,22 +196,62 @@ final class Config {
     }
     
     static let shared: Config = {
-        Config(
-            gameMode: .hard, //segmented control easy/medium/hard
-            boardTilesNumber: 12, //stepper max is 14
-            boardPadding: 8, //stepper max is 20
-            tileGap: 2, //stepper max is 12
-            boardCornerRadius: 8, //stepper max is 20
-            boardColor: .secondarySystemBackground,
-            closedTileColor: .systemFill,
-            openedTileColor: .tertiarySystemFill,
-            bombTileColor: .black,
-            explodingBombTileColor: .darkGray,
-            bombsNearbyColor: .secondaryLabel,
-            markBorderColor: .systemPink,
-            bombSymbol: "⭐️", //segmented control other 6 random emojis
-            markBorderWidth: 2, //stepper max is 4
-            isHapticsEnabled: true //switch
-        )
+        return Config.loadFromUserDefaults()
     }()
+    
+    private func saveToUserDefaults() {
+        let defaults = UserDefaults.standard
+        defaults.set(gameMode.rawValue, forKey: Keys.gameMode)
+        defaults.set(boardTilesNumber, forKey: Keys.boardTilesNumber)
+        defaults.set(boardPadding, forKey: Keys.boardPadding)
+        defaults.set(tileGap, forKey: Keys.tileGap)
+        defaults.set(boardCornerRadius, forKey: Keys.boardCornerRadius)
+        defaults.set(boardColor, forKey: Keys.boardColor)
+        defaults.set(closedTileColor, forKey: Keys.closedTileColor)
+        defaults.set(openedTileColor, forKey: Keys.openedTileColor)
+        defaults.set(bombTileColor, forKey: Keys.bombTileColor)
+        defaults.set(explodingBombTileColor, forKey: Keys.explodingBombTileColor)
+        defaults.set(bombsNearbyColor, forKey: Keys.bombsNearbyColor)
+        defaults.set(markBorderColor, forKey: Keys.markBorderColor)
+        defaults.set(bombSymbol, forKey: Keys.bombSymbol)
+        defaults.set(markBorderWidth, forKey: Keys.markBorderWidth)
+        defaults.set(isHapticsEnabled, forKey: Keys.isHapticsEnabled)
+    }
+    
+    private static func loadFromUserDefaults() -> Config {
+        let defaults = UserDefaults.standard
+        let gameMode = GameMode(rawValue: defaults.integer(forKey: Keys.gameMode)) ?? GameMode(string: Config.gameModeOptions.first ?? "")
+        let boardTilesNumber = defaults.integer(forKey: Keys.boardTilesNumber)
+        let boardPadding = defaults.integer(forKey: Keys.boardPadding)
+        let tileGap = defaults.integer(forKey: Keys.tileGap)
+        let boardCornerRadius = defaults.integer(forKey: Keys.boardCornerRadius)
+        let boardColor = defaults.string(forKey: Keys.boardColor) ?? "BoardColor"
+        let closedTileColor = defaults.string(forKey: Keys.closedTileColor) ?? "ClosedTileColor"
+        let openedTileColor = defaults.string(forKey: Keys.openedTileColor) ?? "OpenedTileColor"
+        let bombTileColor = defaults.string(forKey: Keys.bombTileColor) ?? "BombTileColor"
+        let explodingBombTileColor = defaults.string(forKey: Keys.explodingBombTileColor) ?? "ExplodingBombTileColor"
+        let bombsNearbyColor = defaults.string(forKey: Keys.bombsNearbyColor) ?? "BombsNearbyColor"
+        let markBorderColor = defaults.string(forKey: Keys.markBorderColor) ?? Config.markColorOptions.first ?? ""
+        let bombSymbol = defaults.string(forKey: Keys.bombSymbol) ?? Config.bombSymbolOptions.first ?? ""
+        let markBorderWidth = defaults.integer(forKey: Keys.markBorderWidth)
+        let isHapticsEnabled = defaults.bool(forKey: Keys.isHapticsEnabled)
+        
+        return Config(
+            gameMode: gameMode,
+            boardTilesNumber: boardTilesNumber == 0 ? 12 : boardTilesNumber, // Default value if 0
+            boardPadding: boardPadding == 0 ? 8 : boardPadding, // Default value if 0
+            tileGap: tileGap == 0 ? 2 : tileGap, // Default value if 0
+            boardCornerRadius: boardCornerRadius == 0 ? 8 : boardCornerRadius, // Default value if 0
+            boardColor: boardColor,
+            closedTileColor: closedTileColor,
+            openedTileColor: openedTileColor,
+            bombTileColor: bombTileColor,
+            explodingBombTileColor: explodingBombTileColor,
+            bombsNearbyColor: bombsNearbyColor,
+            markBorderColor: markBorderColor,
+            bombSymbol: bombSymbol,
+            markBorderWidth: markBorderWidth == 0 ? 2 : markBorderWidth, // Default value if 0
+            isHapticsEnabled: isHapticsEnabled
+        )
+    }
 }

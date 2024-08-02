@@ -22,6 +22,7 @@ class SampleBoardView: UIView, ConfigDelegate {
     let labelDown = UILabel()
     
     let boardView = UIView()
+    let wrapperView = UIView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -45,12 +46,15 @@ class SampleBoardView: UIView, ConfigDelegate {
         configureLabels()
         configureTiles()
         configureBoardView()
+        configureWrapperView()
         
-        self.addSubview(boardView)
-        self.addSubview(labelUp)
-        self.addSubview(labelDown)
-        self.addSubview(labelLeft)
-        self.addSubview(labelRight)
+        self.addSubview(wrapperView)
+        
+        wrapperView.addSubview(boardView)
+        wrapperView.addSubview(labelUp)
+        wrapperView.addSubview(labelDown)
+        wrapperView.addSubview(labelLeft)
+        wrapperView.addSubview(labelRight)
         
         boardView.addSubview(tile1)
         boardView.addSubview(tile2)
@@ -59,7 +63,7 @@ class SampleBoardView: UIView, ConfigDelegate {
     }
     
     private func configureBoardView() {
-        boardView.backgroundColor = Config.shared.boardColor
+        boardView.backgroundColor = UIColor(named: Config.shared.boardColor)
         boardView.layer.cornerRadius = CGFloat(Config.shared.boardCornerRadius)
         boardView.layer.cornerCurve = .continuous
     }
@@ -67,7 +71,7 @@ class SampleBoardView: UIView, ConfigDelegate {
     private func configureLabels() {
         [labelUp, labelDown, labelLeft, labelRight].forEach {
             $0.text = "\(Config.shared.boardTilesNumber)"
-            $0.font = .systemFont(ofSize: 16)
+            $0.font = .monospacedSystemFont(ofSize: 16, weight: .medium)
             $0.textColor = .secondaryLabel
         }
     }
@@ -79,6 +83,15 @@ class SampleBoardView: UIView, ConfigDelegate {
         configureTile(tile4, of: .closed)
     }
     
+    private func configureWrapperView() {
+        let markBorderColor = Config.shared.markBorderColor
+        if traitCollection.userInterfaceStyle == .dark {
+            wrapperView.backgroundColor = UIColor(named: markBorderColor)?.withAlphaComponent(0.1) ?? .clear
+        } else {
+            wrapperView.backgroundColor = UIColor(named: markBorderColor)?.withAlphaComponent(0.3) ?? .clear
+        }
+    }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         
@@ -86,15 +99,25 @@ class SampleBoardView: UIView, ConfigDelegate {
         let tileGap = CGFloat(Config.shared.tileGap)
         let boardSize = Constants.tileSize * 2 + tileGap * 3
         
-        let boardOriginX = (self.bounds.width - boardSize) / 2
-        let boardOriginY = (self.bounds.height - boardSize) / 2
+        let wrapperSize = min(self.bounds.width, self.bounds.height)
+        let wrapperOriginX = (self.bounds.width - wrapperSize) / 2
+        let wrapperOriginY = (self.bounds.height - wrapperSize) / 2
+        
+        wrapperView.frame = CGRect(
+            x: wrapperOriginX,
+            y: wrapperOriginY,
+            width: wrapperSize,
+            height: wrapperSize
+        )
         
         configureTiles()
         configureLabels()
+        configureBoardView()
+        configureWrapperView()
         
         boardView.frame = CGRect(
-            x: boardOriginX,
-            y: boardOriginY,
+            x: (wrapperView.bounds.width - boardSize) / 2,
+            y: (wrapperView.bounds.height - boardSize) / 2,
             width: boardSize,
             height: boardSize
         )
@@ -128,29 +151,29 @@ class SampleBoardView: UIView, ConfigDelegate {
         )
         
         labelUp.frame = CGRect(
-            x: (self.bounds.width - labelUp.intrinsicContentSize.width) / 2,
-            y: boardOriginY - padding - labelUp.intrinsicContentSize.height,
+            x: (wrapperView.frame.maxX - labelUp.intrinsicContentSize.width) / 2,
+            y: boardView.frame.minY - padding - labelUp.intrinsicContentSize.height,
             width: labelUp.intrinsicContentSize.width,
             height: labelUp.intrinsicContentSize.height
         )
         
         labelDown.frame = CGRect(
-            x: (self.bounds.width - labelDown.intrinsicContentSize.width) / 2,
-            y: boardOriginY + boardSize + padding,
+            x: (wrapperView.frame.maxX - labelUp.intrinsicContentSize.width) / 2,
+            y: boardView.frame.maxY + padding,
             width: labelDown.intrinsicContentSize.width,
             height: labelDown.intrinsicContentSize.height
         )
         
         labelLeft.frame = CGRect(
-            x: boardOriginX - padding - labelLeft.intrinsicContentSize.width,
-            y: (self.bounds.height - labelLeft.intrinsicContentSize.height) / 2,
+            x: boardView.frame.minX - padding - labelLeft.intrinsicContentSize.width,
+            y: (wrapperView.frame.maxY - labelUp.intrinsicContentSize.height) / 2,
             width: labelLeft.intrinsicContentSize.width,
             height: labelLeft.intrinsicContentSize.height
         )
         
         labelRight.frame = CGRect(
-            x: boardOriginX + boardSize + padding,
-            y: (self.bounds.height - labelRight.intrinsicContentSize.height) / 2,
+            x: boardView.frame.maxX + padding,
+            y: (wrapperView.frame.maxY - labelUp.intrinsicContentSize.height) / 2,
             width: labelRight.intrinsicContentSize.width,
             height: labelRight.intrinsicContentSize.height
         )
@@ -163,19 +186,19 @@ class SampleBoardView: UIView, ConfigDelegate {
         switch type {
         case .bomb:
             button.setTitle("\(Config.shared.bombSymbol)", for: .normal)
-            button.backgroundColor = Config.shared.bombTileColor
+            button.backgroundColor = UIColor(named: Config.shared.bombTileColor)
         case .marked:
-            button.backgroundColor = Config.shared.closedTileColor
+            button.backgroundColor = UIColor(named: Config.shared.closedTileColor)
             button.layer.borderWidth = CGFloat(Config.shared.markBorderWidth)
-            button.layer.borderColor = Config.shared.markBorderColor.cgColor
+            button.layer.borderColor = UIColor(named: Config.shared.markBorderColor)?.cgColor
         case .closed:
-            button.backgroundColor = Config.shared.closedTileColor
+            button.backgroundColor = UIColor(named: Config.shared.closedTileColor)
         }
     }
     
     func configDidChange() {
-        setNeedsLayout()
-        layoutIfNeeded()
-        layoutSubviews()
+        UIView.animate(withDuration: 0.1) {
+            self.layoutSubviews()
+        }
     }
 }

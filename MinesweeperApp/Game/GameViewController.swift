@@ -3,6 +3,7 @@ import UIKit
 class GameViewController: UIViewController {
     private let padding: CGFloat = CGFloat(Config.shared.boardPadding)
     private let boardView = BoardView(gameMode: Config.shared.gameMode)
+    private let gameSubview = UIView()
     private let backButton = UIButton()
     private let flagButton = UIButton()
     
@@ -12,12 +13,17 @@ class GameViewController: UIViewController {
         super.viewDidLoad()
         self.view.backgroundColor = .systemBackground
         self.navigationController?.isNavigationBarHidden = true
+        setupGameSubview()
         setupBoard()
         setupControls()
     }
-
+    
     private func setupBoard() {
         view.addSubview(boardView)
+    }
+
+    private func setupGameSubview() {
+        view.addSubview(gameSubview)
     }
     
     private func setupControls() {
@@ -51,9 +57,14 @@ class GameViewController: UIViewController {
 
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
+        layoutGameSubview()
         updateBoardPosition()
         layoutBackButton()
         layoutFlagButton()
+    }
+    
+    private func layoutGameSubview() {
+        gameSubview.frame = view.bounds
     }
     
     private func updateBoardPosition() {
@@ -79,6 +90,12 @@ class GameViewController: UIViewController {
             height: 48
         )
     }
+    
+    func changeSubviewColor(color: UIColor?) {
+        UIView.animate(withDuration: 0.3) {
+            self.gameSubview.backgroundColor = color
+        }
+    }
 
     @objc
     private func toggleFlagMode(_ sender: UISwitch) {
@@ -86,17 +103,17 @@ class GameViewController: UIViewController {
         self.boardView.isFlaggingMode = self.isFlaggingMode
         
         let imageConfig = UIImage.SymbolConfiguration(weight: .bold)
-        let bounceAnimation = CAKeyframeAnimation(keyPath: "transform.scale")
-        bounceAnimation.values = [1.0, 0.95, 1.05, 1.0]
-        bounceAnimation.keyTimes = [0, 0.3, 0.6, 1]
-        bounceAnimation.duration = 0.3
+//        let bounceAnimation = CAKeyframeAnimation(keyPath: "transform.scale")
+//        bounceAnimation.values = [1.0, 0.95, 1.05, 1.0]
+//        bounceAnimation.keyTimes = [0, 0.3, 0.6, 1]
+//        bounceAnimation.duration = 0.3
         
         if self.isFlaggingMode {
             let image = UIImage(systemName: "flag", withConfiguration: imageConfig)
-            self.flagButton.backgroundColor = Config.shared.markBorderColor
+            self.flagButton.backgroundColor = UIColor(named: Config.shared.markBorderColor) ?? .clear
             self.flagButton.setImage(image, for: .normal)
             self.flagButton.tintColor = .label
-            self.flagButton.layer.borderColor = Config.shared.markBorderColor.cgColor
+            self.flagButton.layer.borderColor = UIColor(named: Config.shared.markBorderColor)?.cgColor
             self.flagButton.layer.borderWidth = 0
         } else {
             let image = UIImage(systemName: "flag.fill", withConfiguration: imageConfig)
@@ -107,7 +124,7 @@ class GameViewController: UIViewController {
             self.flagButton.layer.borderWidth = 0
         }
         
-        flagButton.layer.add(bounceAnimation, forKey: "bounce")
+//        flagButton.layer.add(bounceAnimation, forKey: "bounce")
     }
 
     @objc
